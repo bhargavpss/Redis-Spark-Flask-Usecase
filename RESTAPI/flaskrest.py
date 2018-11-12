@@ -3,6 +3,7 @@ from flask import request
 from flask import jsonify
 from redis.exceptions import WatchError
 import redis
+import json
 
 hostname = 'madstreetden-001.a1hyc5.0001.use1.cache.amazonaws.com'
 port = 6379
@@ -11,11 +12,15 @@ r = redis.Redis(host=hostname, port=port)
 
 app = Flask(__name__)
 
+@app.route("/")
+def index():
+	return 'GET /getRecentItem, \n GET /getBrandsCount, \n GET /getItemsbyColor'
+
 @app.route("/getRecentItem")
 def getRecentItem():
 	
 	a = request.args
-	if 'date' not in a: 
+	if 'date' not in a:
 		return jsonify({"body":"Missing required parameters: date","HTTP_Status": "404_BAD_REQUEST"})
 	elif len(a['date']) != 10 or a['date'][4] != '-' or a['date'][7] != '-':
 		return jsonify({"body":"date should be in yyyy-mm-dd format","HTTP_Status": "404_BAD_REQUEST"})
@@ -23,7 +28,6 @@ def getRecentItem():
 		date = a.get('date')
 
         pipe = r.pipeline(transaction=True)
-
         while 1:
                 try:
                         pipe.watch('{}:id:latest'.format(date),'{}:brand:latest'.format(date),'{}:color:latest'.format(date))
@@ -32,7 +36,7 @@ def getRecentItem():
                         pipe.lrange('{}:brand:latest'.format(date),0,0)
                         pipe.lrange('{}:color:latest'.format(date),0,0)
 
-                        value = pipe.execute() # Enforcing Transactional Updates
+                        value = pipe.execute()
                         break
                 except WatchError:
                         continue
@@ -63,10 +67,10 @@ def getBrandsCount():
 	while 1:
 		try:
 			pipe.watch('{}:brandcount'.format(date))
-			pipe.multi()		
+			pipe.multi()
 			pipe.zrange('{}:brandcount'.format(date),0,-1,desc=True,withscores=True)
 	
-			value = pipe.execute()	# Enforcing Transactional Updates
+			value = pipe.execute()
 			break
 		except WatchError:
 			continue
@@ -93,6 +97,7 @@ def getItemsbyColor():
 		color = a.get('color')
 
 	pipe = r.pipeline(transaction=True)
+	#L = ['{}:id:latest10'.format(color),'{}:brand:latest10'.format(color),'{}:color:latest10'.format(color),'{}:dateAdded:latest10'.format(color)]
 	while 1:
 		try:
 			
@@ -103,17 +108,18 @@ def getItemsbyColor():
 			pipe.lrange('{}:color:latest10'.format(color),0,9)
 			pipe.lrange('{}:dateAdded:latest10'.format(color),0,9)
 
-			value = pipe.execute() # Enforcing Transactional Updates
+			value = pipe.execute()
 			break
 		except WatchError:
 			continue
 			
-	for i in range(0,len(value)): # Key is not found if value has empty lists
+	for i in range(0,len(value)):
                 if value[i] == []:
                         return jsonify({"body":"key not found with given color:{}".format(color), "HTTP_Status": "400_BAD_REQUEST"})
 
 	result = []
-	
+	#print len(ids), len(brands), len(colors), len(dateAddeds)
+
 	for i in range(0,len(value[0])):
 			entry = {}
 			entry['id'] = value[0][i]
