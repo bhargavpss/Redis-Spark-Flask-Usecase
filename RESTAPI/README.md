@@ -14,6 +14,8 @@ The input parameters are provided using Query String parameters which meands the
 
 `GET http://<endpoint>/getRecentItem?color=<color>`
 
+The API program covers cases of user errors such as missing parmeters, wrong format input, key out of range.
+
 Ideally, this Docker container that packages flask application can be run on Kubernetes but for the sake of simplicity the continer is being run on  single EC2 instance of type `t2.micro` using Amazon Linux AMI.
 
 The Docker image for this application is pulled from my public DockerHub account
