@@ -1,3 +1,7 @@
+Spark is implemented in stand-alone implementaion on a single node.
+
+This spark code uses dataframes to read the csv file and apply transformations on the data
+
 The following are the transformations we need to do before insertion of data:
 
 - Retrieve only columns with names id, brand, color and dateAdded
