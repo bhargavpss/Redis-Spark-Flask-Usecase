@@ -37,11 +37,13 @@ for row in data.collect():
                         pipe.watch(*L)         # Enforcing Atomic Transaction
 
                         pipe.multi()           # Start the Transaction
-
+			"""
                         for i in head[0:3]:
                                 pipe.lpush('{}:{}:latest'.format(date, i),row[head.index(i)])
                                 pipe.ltrim('{}:{}:latest'.format(date, i),0,0)
-
+			"""
+			hashinput = { 'id' : row[0], 'brand' : row[1], 'color' : row[2] }
+			pipe.hmset('{}:latest'.format(date), hashinput)
                         for i in head:
                                 pipe.lpush('{}:{}:latest10'.format(color,i),row[head.index(i)])
                                 pipe.ltrim('{}:{}:latest10'.format(color,i),0,9)

@@ -32,24 +32,17 @@ def getRecentItem():
                 try:
                         pipe.watch('{}:id:latest'.format(date),'{}:brand:latest'.format(date),'{}:color:latest'.format(date))
                         pipe.multi()
-                        pipe.lrange('{}:id:latest'.format(date),0,0)
-                        pipe.lrange('{}:brand:latest'.format(date),0,0)
-                        pipe.lrange('{}:color:latest'.format(date),0,0)
-
+			pipe.hgetall('{}:latest'.format(date))
                         value = pipe.execute()
                         break
                 except WatchError:
                         continue
 	
 	
-	for i in range(0,len(value)):
-		if value[i] == []:
-			return jsonify({"body":"key not found with given date:{}".format(date),"HTTP_Status":"404_BAD_REQUEST"})
+	if value[0].keys() == []:
+		return jsonify({"body":"key not found with given date:{}".format(date),"HTTP_Status":"404_BAD_REQUEST"})
         
-	result = {}
-        result['id'] = value[0][0]
-        result['brand'] = value[1][0]
-        result['color'] = value[2][0]
+        result = value[0]
 
         return jsonify({"body":result, "HTTP_Status": "200_OK"})
 
