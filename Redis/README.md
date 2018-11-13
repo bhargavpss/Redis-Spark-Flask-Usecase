@@ -13,7 +13,7 @@ The dateAdded colum is in the format `yyyy-mm-ddThh:mm:ssZ` but the API requests
 Input: Date
 Output: id, color, brand
 ```
-We can make use of hashes fpr this scenario. We can have one key of type hash for every date. Every new insertion of data into Redis will oveewrite the values of the fields `'id', 'brand', 'color'` in the hash.
+We can make use of hashes for this scenario. We can have one key of type hash for every date. Every new insertion of data into Redis will oveewrite the values of the fields `'id', 'brand', 'color'` in the hash.
 
 To write values of multiple keys at once, we can use `HMSET` command
 
