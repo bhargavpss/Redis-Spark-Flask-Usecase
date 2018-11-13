@@ -1,4 +1,4 @@
-Spark is implemented in stand-alone implementaion on a single node.
+Spark is implemented in stand-alone mode on a single node.
 
 This spark code uses dataframes to read the csv file and apply transformations on the data
 
