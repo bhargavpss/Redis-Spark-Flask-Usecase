@@ -4,8 +4,6 @@ We have three API requests accessing the data stored in Redis namely `/getRecent
 
 ## Key Design
 
-
-
 The data is already sorted in ascending order by the 'dateAdded' column as you cn see in the SampleDataAfterTransformation.csv (Recent entries in the end)
 
 The dateAdded colum is in the format `yyyy-mm-ddThh:mm:ssZ` but the API requests are only performing queries based on Date `yyyy-mm-dd`. So, the original `dateAdded` column is only used for sorting the data and not included in ny of the key names.
@@ -15,38 +13,40 @@ The dateAdded colum is in the format `yyyy-mm-ddThh:mm:ssZ` but the API requests
 Input: Date
 Output: id, color, brand
 ```
-Lists(LinkedLists) in redis are popular data types to store the latest items. In this scenario, to get the latest item for a given day we can implement capped lists. Capped lists can be implemented by using LPUSH and LTRIM commands are used together
+We can make use of hashes fpr this scenario. We can have one key of type hash for every date. Every new insertion of data into Redis will oveewrite the values of the fields `'id', 'brand', 'color'` in the hash.
+
+To write values of multiple keys at once, we can use `HMSET` command
 
 ```
->>> lpush mykey value
->>> ltrim mykey 0 0
+>>> hmset mykey field1 value1 field2 value2
 ```
 
-This way of implementing capped lists ensure that the list always has only one element which has to be the most recently updated one.
-
-For our scenario, we can use three capped lists for a day with each one of them storing the values of id, brand and color. Every time a new insertion occurs, the old values in these lists are replaced by the most recent items. 
-
-The three lists would have key names in the following format:
-`<date>:<column_name>:latest`
+The hash would have key name in the following format:
+`<date>:latest`
 
 Example keys: 
 ```
-2017-03-28:id:latest
-2017-03-28:brand:latest
-2017-03-28:color:latest
+2017-03-28:latest
+2016-04-09:latest
 ```
+
 ### /getItembyColor
 ```
 Input: Color
 Output: (id, color, brand, DateAdded) for latest 10 items of the given color
 ```
-Similar to the previous case, we can use capped lists of length 10 to store the latest 10 items for a particular color. 
+Lists(LinkedLists) in redis are popular data types to store the latest items. In this scenario, to get the 10 latest items for a given color we can implement capped lists. Capped lists can be implemented by using LPUSH and LTRIM commands are used together
+
+In this case, we can use capped lists of length 10 to store the latest 10 items for a particular color. 
 
 ```
 >>> lpush mykey value
 >>> ltrim mykey 0 9
 ```
-We'll have three different lists again, storing the values of id, brand and dateAdded.
+
+This way of implementing capped lists ensure that the list always has only one element which has to be the most recently updated one.
+
+For our scenario, we can use three capped lists for a color with each one of them storing the values of id, brand and dateAdded. Every time a new insertion occurs, the old values in these lists are replaced by the most recent items. 
 
 The lists would have key names in the following format:
  `<color>:<column_name>:latest10`
