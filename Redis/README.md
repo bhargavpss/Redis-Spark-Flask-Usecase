@@ -78,7 +78,12 @@ The key name for these SortedSets are in the following format
 Example key: `2017-03-28:brandcount`
 
 
-There we have 7 keys in total that are updated upon insertion of every item. 
+There we have 5 keys in total that are updated upon insertion of every item namely,
+`<date>:latest`,
+`<date>:brandcount`,
+`<date>:id:latest10`,
+`<date>:brand:latest10`,
+`<date>:dateAdded:latest10`,
 
 With this design, we ensure that data is not redundantly stored in the database that is not used by the queries. But one potential drawback for this design is that there is no enforcement of transactional consistency from the database side. 
 
