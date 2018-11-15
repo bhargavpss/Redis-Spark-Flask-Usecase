@@ -111,8 +111,6 @@ def getItemsbyColor():
                         return jsonify({"body":"key not found with given color:{}".format(color), "HTTP_Status": "400_BAD_REQUEST"})
 
 	result = []
-	#print len(ids), len(brands), len(colors), len(dateAddeds)
-
 	for i in range(0,len(value[0])):
 			entry = {}
 			entry['id'] = value[0][i]
